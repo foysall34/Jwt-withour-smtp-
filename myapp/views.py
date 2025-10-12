@@ -10,7 +10,8 @@ from .serializers import (
     VerifyOtpSerializer,
     LoginSerializer,
     ForgotPasswordSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer,
+    ResendOtpSerializer
 )
 
 User = get_user_model()
@@ -49,6 +50,41 @@ class VerifyOtpView(APIView):
         return Response(serializer.errors, status=400)
 
 
+
+class ResendOtpView(APIView):
+    def post(self, request):
+        serializer = ResendOtpSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user = User.objects.get(email=email)
+
+                new_otp = str(random.randint(100000, 999999))
+                user.otp = new_otp
+                user.save()
+
+                print(f"New OTP for {user.email} is: {new_otp}")
+
+                return Response(
+                    {"message": "OTP resent successfully.check your terminal"},
+                    status=status.HTTP_200_OK
+                )
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
 # ===========================
 # Login View
 # ===========================
@@ -79,8 +115,8 @@ class ForgotPasswordView(APIView):
                 user = User.objects.get(email=email)
                 user.otp = str(random.randint(100000, 999999))
                 user.save()
-                print(f"📢 Password reset OTP for {email}: {user.otp}")
-                return Response({'message': 'OTP sent to terminal (simulating email).'})
+                print(f"Password reset OTP for {email}: {user.otp}")
+                return Response({'message': 'OTP sent to terminal '})
             except User.DoesNotExist:
                 return Response({'error': 'User not found'}, status=404)
         return Response(serializer.errors, status=400)
