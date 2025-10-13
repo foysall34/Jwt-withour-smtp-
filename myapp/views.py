@@ -42,6 +42,7 @@ class VerifyOtpView(APIView):
                 user = User.objects.get(email=email)
                 if user.otp == otp:
                     user.otp = None
+                    user.is_active = True
                     user.save()
                     return Response({'message': 'OTP verified successfully '})
                 return Response({'error': 'Invalid OTP'}, status=400)
@@ -54,8 +55,10 @@ class VerifyOtpView(APIView):
 class ResendOtpView(APIView):
     def post(self, request):
         serializer = ResendOtpSerializer(data=request.data)
+
         if serializer.is_valid():
             email = serializer.validated_data['email']
+            print(email)
             try:
                 user = User.objects.get(email=email)
 
@@ -76,13 +79,6 @@ class ResendOtpView(APIView):
                 )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
 
 
 # ===========================
