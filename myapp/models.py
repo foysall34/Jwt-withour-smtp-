@@ -62,17 +62,12 @@ from django.conf import settings
 from django.utils import timezone
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='profile'
-    )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
     address = models.CharField(max_length=255, blank=True)
     date_of_birth = models.DateField(blank=True, null=True)
-
 
     is_verified = models.BooleanField(default=False)
 

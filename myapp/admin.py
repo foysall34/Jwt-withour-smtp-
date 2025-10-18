@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User
+from .models import User , UserProfile
+
+
+admin.site.register(UserProfile)
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('email', 'full_name', 'role', 'is_staff', 'is_active')
