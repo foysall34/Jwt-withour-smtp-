@@ -49,3 +49,58 @@ class ChangePasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
     new_password = serializers.CharField(write_only=True)
+
+
+
+# ---------------   E-commerce -------------------
+
+from .models import Category , Customer, Order , OrderItem , Product
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source='category',  
+        write_only=True
+    )
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'category' , 'category_id']
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source='product', write_only=True
+    )
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'product_id', 'quantity']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer(read_only=True)
+    customer_id = serializers.PrimaryKeyRelatedField(
+        queryset=Customer.objects.all(), source='customer', write_only=True
+    )
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'customer_id', 'created_at', 'items']

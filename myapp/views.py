@@ -156,3 +156,63 @@ class LogoutView(APIView):
             return Response({'message': 'Logout successful '})
         except Exception:
             return Response({'error': 'Invalid token'}, status=400)
+
+
+from rest_framework.decorators import api_view , permission_classes
+from .serializers import CategorySerializer , ProductSerializer
+from .models import Category , Product
+
+@api_view(['GET' , 'POST'])
+def all_category_list(request):
+    if request.method == 'GET':
+        all_category = Category.objects.all()
+        serializsers = CategorySerializer(all_category , many = True)
+        return Response(serializsers.data)
+    elif request.method == 'POST':
+        serializers = CategorySerializer(data= request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response (serializers.data  )
+        return Response(serializers.errors)
+    
+
+# @api_view(['GET', 'POST'])
+# def product_list_create(request):
+#     if request.method == 'GET':
+#         products = Product.objects.all()
+#         serializer = ProductSerializer(products, many=True)
+#         return Response(serializer.data)
+#     elif request.method == 'POST':
+#         serializer = ProductSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'POST'])
+def product_list_create(request):
+    if request.method == 'GET':
+     
+        products = Product.objects.all()
+
+        search_query = request.GET.get('search')
+        if search_query:
+            products = products.filter(name__icontains=search_query)
+
+
+        sort_param = request.GET.get('sort')
+        if sort_param == 'asc':
+            products = products.order_by('price')       
+        elif sort_param == 'desc':
+            products = products.order_by('-price')       
+
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
