@@ -7,8 +7,8 @@ from .views import (
     ChangePasswordView,
     LogoutView,
     ResendOtpView,
-    all_category_list,
-    product_list_create
+    get_all_category
+
 )
 
 urlpatterns = [
@@ -19,8 +19,8 @@ urlpatterns = [
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('get_all_category/' , get_all_category , name= 'cate')
 
-    path('get-all-category/' , all_category_list , name= 'get-al') ,
-    path('get-all-products/' , product_list_create , name= 'get-al') ,
+   
     
 ]

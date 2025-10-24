@@ -1,13 +1,22 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User , UserProfile , Category , Product , Order , OrderItem
+from .models import User , UserProfile  , Category , Order, OrderItem, Product , Customer
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
 
+
+admin.site.register(Category)
+admin.site.register(Order)
+admin.site.register(OrderItem)
 admin.site.register(Product)
+admin.site.register(Customer)
+
+
+# @admin.register(Category)
+# class CategoryAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'name')
+
+
 
 
 admin.site.register(UserProfile)
