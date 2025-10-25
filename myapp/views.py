@@ -158,7 +158,7 @@ class LogoutView(APIView):
             return Response({'error': 'Invalid token'}, status=400)
 
 
-# -------------------   Order Process views.py ------------------------
+# -------------------   simple order  Process views.py ------------------------
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -295,3 +295,31 @@ def customer_detail(request, pk):
 
 
     
+# ----------------------------  For Order views.py (FBV) ----------------------------------
+
+@api_view(['GET', 'POST'])
+def order_list_create(request):
+ 
+    if request.method == 'GET':
+        orders = Order.objects.prefetch_related('orders__product').all()
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = OrderSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def order_detail(request, pk):
+  
+    try:
+        order = Order.objects.prefetch_related('orders__product').get(pk=pk)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = OrderSerializer(order)
+    return Response(serializer.data)
