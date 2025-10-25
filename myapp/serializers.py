@@ -51,20 +51,55 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
 
 
+# ------------------  Simple Order Process ------------------------
 
 
-from .models import Category , Product , Order , OrderItem
+from rest_framework import serializers
+from .models import Category, Product, Customer, Order, OrderItem
 
 
-class CategorySerializers(serializers.ModelSerializer):
-    class Meta : 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
         model = Category
         fields = '__all__'
 
 
-class ProductSerializers(serializers.ModelSerializer):
-    category = CategorySerializers(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all() , source = 'products' , write_only = True)
-    class Meta :
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
         model = Product
-        fields = ['id' , 'name' , 'price' , 'category' , 'category_id']
+        fields = '__all__'
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source='product', write_only=True
+    )
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'product_id', 'quantity']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, write_only=True)
+    order_items = OrderItemSerializer(many=True, read_only=True, source='orders')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'created_at', 'items', 'order_items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        order = Order.objects.create(**validated_data)
+        for item in items_data:
+            OrderItem.objects.create(order=order, **item)
+        return order
